@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  name    String  @db.VarChar(255)
+  email   String   @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+  github String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  title String  @db.VarChar(255)
+  description String @db.Text
+  stack ProjectStackEnum
+  estimatedTime Int? //hours
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  title String  @db.VarChar(255)
+  description String @db.Text
+  stack ProjectStackEnum
+  complexity Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  usersTasks UserTask[]
+}
+
+model UserProject {
+  id String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  userId String @db.Uuid
+  projectId String @db.Uuid
+  finishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserTask {
+  id String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
+  taskId String @db.Uuid
+  task Task @relation(fields: [taskId], references: [id])
+  userProjectId String
+  status UserTaskStatusEnum
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProjectStackEnum {
+  full
+  back
+  front
+}
+
+enum UserTaskStatusEnum {
+  todo
+  doing
+  done
+}
