@@ -15,6 +15,30 @@ async function tasksSeed() {
         },
     })
     await prisma.task.upsert({
+        where: { id: "738a05da-2d77-485f-95c4-5e08bc0f0376" },
+        update: {},
+        create: {
+            id: '738a05da-2d77-485f-95c4-5e08bc0f0376',
+            title: 'Task teste 2',
+            description: 'Lorem ipsum é o melhor de todos',
+            stack: ProjectStackEnum.back,
+            projectId: '2a8b2293-dde3-44e8-bc7d-d1f219cbd88f',
+            complexity: 1
+        },
+    })
+    await prisma.task.upsert({
+        where: { id: "ad5a5887-7cb2-43b9-8c0d-a7a64202127d" },
+        update: {},
+        create: {
+            id: 'ad5a5887-7cb2-43b9-8c0d-a7a64202127d',
+            title: 'Task teste 3',
+            description: 'Lorem ipsum é o melhor de todos',
+            stack: ProjectStackEnum.back,
+            projectId: '2a8b2293-dde3-44e8-bc7d-d1f219cbd88f',
+            complexity: 1
+        },
+    })
+    await prisma.task.upsert({
         where: { id: "b8e98492-c7b4-4fe6-9da6-745e95082bd3" },
         update: {},
         create: {

@@ -1,21 +1,120 @@
 import { UserTask, UserTaskStatusEnum } from "@prisma/client";
 import { db } from "../../config/db";
+import { UserTasksBody, UserTaskUpdate } from "./user-tasks.types";
 
 
-const createUserTask = async (status: UserTaskStatusEnum, userProjectId: string, taskId: string): Promise<UserTask> => {
-    const userAlreadyExists = await db.userTask.findFirst({ where: { taskId, userProjectId }});
+const createUserTask = async (data: UserTasksBody): Promise<UserTask> => {
+    const { pos, status, taskId, userProjectId } = data
 
-    if (userAlreadyExists) throw new Error();
+    const userTaskAlreadyExists = await db.userTask.findFirst({ 
+        where: { 
+            taskId, 
+            userProjectId 
+        }
+    });
 
-    const userTask = await db.userTask.create({ data: { status, userProjectId, taskId }})
+    if (userTaskAlreadyExists) throw new Error();
+
+    await db.userTask.updateMany({
+        where: {
+            pos: {
+                gte: pos
+            },
+            status
+        },
+        data: {
+            pos: {
+                increment: 1
+            }
+        }
+    })
+
+    const userTask = await db.userTask.create({ 
+        data: { 
+            status, 
+            userProjectId, 
+            taskId,
+            pos
+        }
+    })
 
     return userTask;
 }
 
-const updateUserTask = async (status: UserTaskStatusEnum, userTaskId: string): Promise<UserTask> => {
+const updateUserTask = async (data: UserTaskUpdate): Promise<UserTask> => {
+
+    const { pos, status, userTaskId } = data
+
+    const sourceTask = await db.userTask.findUnique({ where: { id: userTaskId } })
+
+    if(sourceTask?.status === status) {
+        //pos = destino
+        //sourceTask.pos = atual
+        if(pos > sourceTask.pos) {
+            await db.userTask.updateMany({
+                where: {
+                    pos: {
+                        gt: sourceTask.pos
+                    },
+                    status
+                },
+                data: {
+                    pos: {
+                        decrement: 1
+                    }
+                }
+            })
+        } else if (pos < sourceTask.pos) {{
+            await db.userTask.updateMany({
+                where: {
+                    pos: {
+                        gte: pos
+                    },
+                    status
+                },
+                data: {
+                    pos: {
+                        increment: 1
+                    }
+                }
+            })
+        }}
+    } else {
+        //move
+        //pos = destino
+        //sourceTask.pos = atual
+        await db.userTask.updateMany({
+            where: {
+                pos: {
+                    gt: sourceTask?.pos
+                },
+                status: sourceTask?.status
+            },
+            data: {
+                pos: {
+                    decrement: 1
+                }
+            }
+        })
+
+        await db.userTask.updateMany({
+            where: {
+                pos: {
+                    gte: pos
+                },
+                status
+            },
+            data: {
+                pos: {
+                    increment: 1
+                }
+            }
+        })
+    }
+
     const userTask = await db.userTask.update({
         where: { id: userTaskId },
-        data: { status }
+        data: { status, pos }
     })
 
     return userTask;

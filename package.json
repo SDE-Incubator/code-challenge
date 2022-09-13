@@ -6,8 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev src/index.ts",
-    "setup:dev": "npx prisma migrate dev",
-    "seed": "ts-node prisma/seeds/index.ts"
+    "setup:dev": "npx prisma migrate reset && npm run migrate && npm run seed",
+    "seed": "ts-node prisma/seeds/index.ts",
+    "migrate": "npx prisma migrate dev",
+    "migrate:generate": "npm run migrate --name"
   },
   "repository": {
     "type": "git",
