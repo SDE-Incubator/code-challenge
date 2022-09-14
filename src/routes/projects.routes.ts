@@ -6,6 +6,6 @@ const projectsRouter = Router()
 
 projectsRouter.get("/user/projects", authMiddleware.verifyAuth, projectsController.getUserProjects)
 projectsRouter.get("/projects/:stack", projectsController.getProjectsByStack)
-projectsRouter.get("/project/:id", authMiddleware.verifyAuth, projectsController.getProjectWithTasks)
+projectsRouter.get("/project/:id", projectsController.getProjectWithTasks)
 
 export default projectsRouter
