@@ -1,6 +1,6 @@
-import { UserTask, UserTaskStatusEnum } from "@prisma/client";
+import { Task, UserTask, UserTaskStatusEnum } from "@prisma/client";
 import { db } from "../../config/db";
-import { UserTasksBody, UserTaskUpdate } from "./user-tasks.types";
+import { GetTasksByUserProjectParams, UserTasksBody, UserTaskUpdate } from "./user-tasks.types";
 
 
 const createUserTask = async (data: UserTasksBody): Promise<UserTask> => {
@@ -120,9 +120,45 @@ const updateUserTask = async (data: UserTaskUpdate): Promise<UserTask> => {
     return userTask;
 }
 
+const getTasksByUserProject = async (data: GetTasksByUserProjectParams): Promise<Task[] | UserTask[]> => {
+    if(data.status === "backlog") {
+
+        const userProject = await db.userProject.findUnique({ where: { id: data.userProjectId } })
+
+        const tasks = await db.task.findMany({
+            where: {
+                usersTasks: {
+                    none: {
+                        userProjectId: data.userProjectId
+                    }
+                },
+                projectId: userProject?.projectId
+            }
+        })
+
+        return tasks
+    } else {
+        const tasks = await db.userTask.findMany({
+            where: {
+                userProjectId: data.userProjectId,
+                status: data.status
+            },
+            include: {
+                task: true
+            },
+            orderBy: {
+                pos: "asc"
+            }
+        })
+
+        return tasks
+    }
+}
+
 const userTasksService = {
     createUserTask,
-    updateUserTask
+    updateUserTask,
+    getTasksByUserProject
 }
 
 export default userTasksService;
