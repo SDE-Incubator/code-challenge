@@ -23,6 +23,8 @@ model User {
 model Project {
   id String  @id @db.Uuid @default(dbgenerated("uuid_generate_v4()"))
   title String  @db.VarChar(255)
+  thumbnail String? @db.VarChar(255)
+  images String[]  @db.VarChar(255)
   description String @db.Text
   stack ProjectStackEnum
   estimatedTime Int? //hours
